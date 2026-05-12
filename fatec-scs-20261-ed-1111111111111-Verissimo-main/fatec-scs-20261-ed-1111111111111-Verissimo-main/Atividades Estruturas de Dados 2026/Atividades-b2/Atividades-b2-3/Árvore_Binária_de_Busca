@@ -1,0 +1,265 @@
+class No:
+    def __init__(self, valor):
+        self.valor = valor
+        self.esq = None
+        self.dir = None
+
+
+class ArvoreBST:
+    def __init__(self, raiz=None):
+        self.raiz = raiz
+
+    def inserir(self, valor):
+        self.raiz = self._inserir_recursivo(self.raiz, valor)
+
+    def _inserir_recursivo(self, no, valor):
+
+        if no is None:
+            return No(valor)
+
+        if valor < no.valor:
+            no.esq = self._inserir_recursivo(no.esq, valor)
+
+        elif valor > no.valor:
+            no.dir = self._inserir_recursivo(no.dir, valor)
+
+        return no
+
+    def buscar(self, no, valor):
+
+        if no is None:
+            return None
+
+        if valor == no.valor:
+            return no
+
+        if valor < no.valor:
+            return self.buscar(no.esq, valor)
+
+        return self.buscar(no.dir, valor)
+
+    def analisar_arvore(self, valor_busca):
+
+        print("\n========== DIAGNÓSTICO GERAL ==========")
+
+        if self.raiz is not None:
+            print(f"Raiz da árvore: {self.raiz.valor}")
+
+        print("\nNós internos:")
+        self.imprimir_nos_internos()
+
+        print("\nNós externos (folhas):")
+        self.imprimir_folhas()
+
+        print("\nExibição por níveis:")
+        self.imprimir_niveis()
+
+        print("\n========== DIAGNÓSTICO ESPECÍFICO ==========")
+
+        no = self.buscar(self.raiz, valor_busca)
+
+        if no is None:
+            print(f"O valor {valor_busca} não foi encontrado.")
+            return
+
+        print(f"Nó analisado: {valor_busca}")
+
+        grau = 0
+
+        if no.esq is not None:
+            grau += 1
+
+        if no.dir is not None:
+            grau += 1
+
+        print(f"Grau do nó: {grau}")
+
+        print("Ancestrais:")
+        self.imprimir_ancestrais(valor_busca)
+
+        print("Descendentes:")
+        self.imprimir_descendentes(valor_busca)
+
+        altura = self.calcular_altura(no)
+        print(f"Altura do nó: {altura}")
+
+        profundidade = self.calcular_profundidade(valor_busca)
+        print(f"Profundidade do nó: {profundidade}")
+
+    def imprimir_nos_internos(self):
+
+        def internos(no):
+
+            if no is not None:
+
+                if no.esq is not None or no.dir is not None:
+                    print(no.valor, end=" ")
+
+                internos(no.esq)
+                internos(no.dir)
+
+        internos(self.raiz)
+        print()
+
+    def imprimir_folhas(self):
+
+        def folhas(no):
+
+            if no is not None:
+
+                if no.esq is None and no.dir is None:
+                    print(no.valor, end=" ")
+
+                folhas(no.esq)
+                folhas(no.dir)
+
+        folhas(self.raiz)
+        print()
+
+    def imprimir_niveis(self):
+
+        altura = self.calcular_altura(self.raiz)
+
+        for nivel in range(altura + 1):
+
+            print(f"Nível {nivel}: ", end="")
+
+            self._imprimir_nivel(self.raiz, nivel)
+
+            print()
+
+    def _imprimir_nivel(self, no, nivel):
+
+        if no is None:
+            return
+
+        if nivel == 0:
+            print(no.valor, end=" ")
+
+        else:
+            self._imprimir_nivel(no.esq, nivel - 1)
+            self._imprimir_nivel(no.dir, nivel - 1)
+
+    def calcular_altura(self, no):
+
+        if no is None:
+            return -1
+
+        altura_esq = self.calcular_altura(no.esq)
+        altura_dir = self.calcular_altura(no.dir)
+
+        return max(altura_esq, altura_dir) + 1
+
+    def calcular_profundidade(self, valor):
+
+        return self._calcular_profundidade_rec(self.raiz, valor, 0)
+
+    def _calcular_profundidade_rec(self, no, valor, profundidade):
+
+        if no is None:
+            return -1
+
+        if valor == no.valor:
+            return profundidade
+
+        if valor < no.valor:
+            return self._calcular_profundidade_rec(
+                no.esq,
+                valor,
+                profundidade + 1
+            )
+
+        return self._calcular_profundidade_rec(
+            no.dir,
+            valor,
+            profundidade + 1
+        )
+
+    def imprimir_ancestrais(self, valor):
+
+        ancestrais = []
+
+        self._buscar_ancestrais(self.raiz, valor, ancestrais)
+
+        if len(ancestrais) == 0:
+            print("Não possui ancestrais.")
+
+        else:
+            for a in ancestrais:
+                print(a, end=" ")
+
+            print()
+
+    def _buscar_ancestrais(self, no, valor, ancestrais):
+
+        if no is None:
+            return False
+
+        if no.valor == valor:
+            return True
+
+        if (
+            self._buscar_ancestrais(no.esq, valor, ancestrais)
+            or
+            self._buscar_ancestrais(no.dir, valor, ancestrais)
+        ):
+
+            ancestrais.append(no.valor)
+            return True
+
+        return False
+
+    def imprimir_descendentes(self, valor):
+
+        no = self.buscar(self.raiz, valor)
+
+        if no is None:
+            print("Nó não encontrado.")
+            return
+
+        self._imprimir_desc(no.esq)
+        self._imprimir_desc(no.dir)
+
+        print()
+
+    def _imprimir_desc(self, no):
+
+        if no is not None:
+
+            print(no.valor, end=" ")
+
+            self._imprimir_desc(no.esq)
+            self._imprimir_desc(no.dir)
+
+    def imprimir_ids_memoria(self):
+
+        def percorrer(no):
+
+         if no is not None:
+
+                print(f"Nó: {no.valor} | ID Memória: {id(no)}")
+
+                percorrer(no.esq)
+                percorrer(no.dir)
+
+        percorrer(self.raiz)
+
+# ==========================================
+# TESTE DO PROGRAMA
+# ==========================================
+
+arvore = ArvoreBST()
+
+valores = [50, 30, 70, 20, 40, 60, 80, 10, 35]
+
+for valor in valores:
+    arvore.inserir(valor)
+
+# Diagnóstico específico
+valor_busca = 30
+
+# Diagnóstico geral
+arvore.analisar_arvore(valor_busca)
+
+# IDs de memória
+arvore.imprimir_ids_memoria()
